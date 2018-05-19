@@ -1,7 +1,11 @@
 component 'pdk-runtime' do |pkg, settings, platform|
-  pkg.version settings[:pdk_runtime_version]
-  pkg.sha1sum "http://builds.puppetlabs.lan/puppet-runtime/#{pkg.get_version}/artifacts/#{pkg.get_name}-#{pkg.get_version}.#{platform.name}.tar.gz.sha1"
-  pkg.url "http://builds.puppetlabs.lan/puppet-runtime/#{pkg.get_version}/artifacts/#{pkg.get_name}-#{pkg.get_version}.#{platform.name}.tar.gz"
+  runtime_details = JSON.parse(File.read('configs/components/pdk-runtime.json'))
+  tarball_name = "pdk-runtime-#{pkg.get_version}.#{platform.name}.tar.gz"
+
+  pkg.version runtime_details['version']
+  pkg.url File.join(runtime_details['location'], tarball_name)
+  pkg.sha1sum File.join(runtime_details['location'], "#{tarball_name}.sha1")
+
   pkg.install_only true
 
   install_commands = ["gunzip -c #{pkg.get_name}-#{pkg.get_version}.#{platform.name}.tar.gz | tar -C / -xf -"]

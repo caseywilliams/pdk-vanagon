@@ -1,7 +1,14 @@
 project "pdk" do |proj|
-  # Inherit a bunch of shared settings from pdk-runtime config
-  proj.setting(:pdk_runtime_version, '201805150')
-  proj.inherit_settings 'pdk-runtime', 'git://github.com/puppetlabs/puppet-runtime', proj.pdk_runtime_version
+  platform = proj.get_platform
+  # This project inherits most settings from puppet-runtime:
+  #
+  # - Modifications to global settings like flags and target directories should be made in puppet-runtime.
+  # - Settings included in this file should apply only to local components in this repository
+  runtime_details = JSON.parse(File.read('configs/components/puppet-runtime.json'))
+  settings_filename = "pdk-runtime-#{runtime_details['version']}.#{platform.name}.settings.yaml"
+  settings_filepath = File.join(runtime_details['location'], settings_filename)
+  sha1_filepath = File.join(runtime_details['location'], "#{settings_filename}.sha1")
+  proj.inherit_yaml_settings(settings_filepath, sha1_filepath)
 
   proj.description "Puppet Development Kit"
   proj.version_from_git
@@ -10,8 +17,6 @@ project "pdk" do |proj|
   proj.vendor "Puppet, Inc. <info@puppet.com>"
   proj.homepage "https://www.puppet.com"
   proj.target_repo "puppet5"
-
-  platform = proj.get_platform
 
   if platform.is_macos?
     proj.identifier "com.puppetlabs"
